@@ -9,11 +9,12 @@ from search.base import SearchResult
 
 @dataclass
 class ProcessedResult:
-    topic:    str
-    sources:  list[SearchResult]
-    related:  list[str]          # vault 中相關筆記的標題
-    domain:   str
-    tags:     list[str]
+    topic:     str
+    sources:   list[SearchResult]
+    related:   list[str]          # vault 中相關筆記的標題
+    domain:    str
+    tags:      list[str]
+    followups: list[str]          # 建議的延伸探索主題
 
 
 class ResultHandler:
@@ -22,14 +23,16 @@ class ResultHandler:
         self._vault = vault
 
     def process(self, topic: str, sources: list[SearchResult]) -> ProcessedResult:
-        related = self._find_related(topic)
-        meta    = self._classify(topic)
+        related   = self._find_related(topic)
+        meta      = self._classify(topic)
+        followups = self._suggest_followups(topic)
         return ProcessedResult(
-            topic   = topic,
-            sources = sources,
-            related = related,
-            domain  = meta.get("domain", "知識"),
-            tags    = meta.get("tags", [topic]),
+            topic     = topic,
+            sources   = sources,
+            related   = related,
+            domain    = meta.get("domain", "知識"),
+            tags      = meta.get("tags", [topic]),
+            followups = followups,
         )
 
     # ── private ──────────────────────────────────────────────────────────────
@@ -46,6 +49,16 @@ class ResultHandler:
         )
         return [l.strip() for l in resp.text.strip().splitlines() if l.strip()]
 
+    def _suggest_followups(self, topic: str) -> list[str]:
+        resp = self._llm.complete(
+            f"主題：{topic}\n\n"
+            "請建議 4-6 個延伸研究的主題，以簡單的名詞為主，涵蓋：上位概念（更大的知識框架）、"
+            "下位概念（可深入的子主題）、橫向概念（跨領域的相關概念）。\n"
+            "只回傳主題名稱清單，每行一個，不加說明、不加編號、不加符號。",
+            max_tokens=150,
+        )
+        return [l.strip() for l in resp.text.strip().splitlines() if l.strip()]
+
     def _classify(self, topic: str) -> dict:
         raw = self._llm.complete_json(
             f"主題：{topic}\n"
@@ -53,6 +66,7 @@ class ResultHandler:
             "domain 例子：健康、財經、心理學、科技、歷史、飲食、環境、社會"
         )
         try:
+            raw = raw.strip().strip("```json").strip("```").strip()
             return json.loads(raw)
         except json.JSONDecodeError:
-            return {"domain": "知識", "tags": [topic]}
+            return {"domain": "", "tags": []}

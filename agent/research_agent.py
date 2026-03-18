@@ -23,10 +23,11 @@ ProgressCallback = Callable[[str], None] | None
 
 @dataclass
 class ResearchOutput:
-    topic:  str
-    domain: str
-    path:   Path
-    synced: bool
+    topic:     str
+    domain:    str
+    path:      Path
+    synced:    bool
+    followups: list[str]
 
 
 class ResearchAgent:
@@ -70,10 +71,11 @@ class ResearchAgent:
         synced = await asyncio.to_thread(self._syncer.sync, f"add: {topic}")
 
         return ResearchOutput(
-            topic  = topic,
-            domain = result.domain,
-            path   = path,
-            synced = synced,
+            topic     = topic,
+            domain    = result.domain,
+            path      = path,
+            synced    = synced,
+            followups = result.followups,
         )
 
 
