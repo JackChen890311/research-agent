@@ -14,9 +14,39 @@ class Config:
     # Search
     TAVILY_KEY     = os.getenv("TAVILY_KEY", "")
     SEARCH_DOMAINS = [
-        "wikipedia.org", "britannica.com",
-        "healthline.com", "investopedia.com",
-        "psychologytoday.com", "scientificamerican.com",
+        # 百科 / 知識
+        "wikipedia.org",
+        "zh.wikipedia.org",
+        "wikihow.com",
+        "britannica.com",
+
+        # 英文新聞
+        "bbc.com",
+        "reuters.com",
+        "apnews.com",
+        "theguardian.com",
+        "nytimes.com",
+        "techcrunch.com",
+        "wired.com",
+
+        # 中文新聞（台灣）
+        "udn.com",
+        "ltn.com.tw",
+        "cna.com.tw",
+        "ithome.com.tw",
+
+        # 學術 / 研究 / 技術 / 開發
+        "arxiv.org",
+        "stackoverflow.com",
+
+        # 生活 / 健康 / 財經 / 心理學 / 自我成長
+        "healthline.com",
+        "mayoclinic.org",
+        "investopedia.com",
+        "money.udn.com",
+        "commonhealth.com.tw",
+        "twreporter.org",
+        "scientificamerican.com",
         "hbr.org", "theatlantic.com",
     ]
 
